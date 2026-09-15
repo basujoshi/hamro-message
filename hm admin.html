@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hamro Message — Admin</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#e5ddd5;color:#222}
+.card{width:min(700px,94%);margin:25px auto;background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 30px #0002}
+h1{margin:0;color:#075e54}
+.sub{color:#666}
+input{width:100%;padding:13px;border:1px solid #ccc;border-radius:10px;margin:7px 0;font-size:16px}
+button{border:0;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer}
+.green{background:#25d366;color:#fff}.red{background:#dc2626;color:#fff}.gray{background:#6b7280;color:#fff}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid #ddd;border-radius:12px;padding:10px;margin:8px 0}
+.info{flex:1;min-width:0}.name{font-weight:700}.phone{color:#666;font-size:14px}
+.photo{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#eee}
+#app{display:none}.danger{background:#fff1f2;border:1px solid #fecdd3;padding:10px;border-radius:10px;margin:12px 0}
+#status{padding:10px;border-radius:10px;background:#f3f4f6;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="card" id="login">
+  <h1>⚙️ Hamro Message Admin</h1>
+  <p class="sub">Admin login</p>
+  <input id="adminPhone" inputmode="numeric" placeholder="Admin phone number">
+  <input id="adminPin" type="password" placeholder="Admin PIN">
+  <button class="green" onclick="adminLogin()">Admin Login</button>
+  <div id="loginStatus"></div>
+</div>
+
+<div class="card" id="app">
+  <h1>⚙️ Admin Panel</h1>
+  <p class="sub">User account management</p>
+  <div class="danger">
+    ⚠️ Delete करने से user का profile, posts, friends, requests, chats और calls हटाए जाएंगे।
+  </div>
+  <input id="search" placeholder="Name या phone search" oninput="loadUsers()">
+  <div id="status">Users loading...</div>
+  <div id="users"></div>
+  <button class="gray" onclick="location.reload()">Logout</button>
+</div>
+
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyA5Zxb3ITYxTV61Q7XK2wBa7mPTBgAhJAc",
+ authDomain:"order-tracking-d18f5.firebaseapp.com",
+ databaseURL:"https://order-tracking-d18f5-default-rtdb.firebaseio.com",
+ projectId:"order-tracking-d18f5",
+ storageBucket:"order-tracking-d18f5.firebasestorage.app",
+ messagingSenderId:"165667356277",
+ appId:"1:165667356277:web:aa80aef447c08b8f9d423c"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+/* CHANGE THESE TWO VALUES BEFORE PUBLISHING */
+const ADMIN_PHONE="9999999999";
+const ADMIN_PIN="2580";
+
+function esc(v){
+ return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function adminLogin(){
+ const phone=document.getElementById("adminPhone").value.replace(/\D/g,"");
+ const pin=document.getElementById("adminPin").value;
+ if(phone!==ADMIN_PHONE || pin!==ADMIN_PIN){
+   document.getElementById("loginStatus").textContent="Admin phone/PIN गलत है.";
+   return;
+ }
+ document.getElementById("login").style.display="none";
+ document.getElementById("app").style.display="block";
+ loadUsers();
+}
+async function loadUsers(){
+ const box=document.getElementById("users");
+ const status=document.getElementById("status");
+ box.innerHTML="";
+ status.textContent="Users loading...";
+ try{
+   const snap=await db.ref("users").once("value");
+   const all=snap.val()||{};
+   const q=(document.getElementById("search").value||"").toLowerCase().trim();
+   const list=Object.entries(all).filter(([uid,u])=>{
+     const text=((u?.name||"")+" "+(u?.phone||"")).toLowerCase();
+     return !q || text.includes(q);
+   });
+   status.textContent="Users: "+list.length;
+   if(!list.length){box.innerHTML="<p>No user found.</p>";return}
+   list.forEach(([uid,u])=>{
+     const row=document.createElement("div");
+     row.className="row";
+     const photo=esc(u?.photo||"");
+     row.innerHTML=
+       '<img class="photo" src="'+photo+'" onerror="this.style.visibility=\'hidden\'">'+
+       '<div class="info"><div class="name">'+esc(u?.name||"Unknown")+
+       '</div><div class="phone">'+esc(u?.phone||uid)+'</div></div>'+
+       '<button class="red" onclick="deleteAccount(\''+uid.replace(/'/g,"\\'")+'\')">Delete</button>';
+     box.appendChild(row);
+   });
+ }catch(e){
+   console.error(e);
+   status.textContent="Firebase error: "+e.message;
+ }
+}
+async function deleteAccount(uid){
+ if(!confirm("এই account permanently delete করবেন?"))return;
+ try{
+   const updates={};
+
+   // profile
+   updates["users/"+uid]=null;
+
+   // posts
+   const posts=await db.ref("posts").once("value");
+   posts.forEach(s=>{
+     if((s.val()||{}).uid===uid) updates["posts/"+s.key]=null;
+   });
+
+   // friends
+   updates["friends/"+uid]=null;
+   const friends=await db.ref("friends").once("value");
+   friends.forEach(s=>{
+     if(s.hasChild(uid)) updates["friends/"+s.key+"/"+uid]=null;
+   });
+
+   // friend requests
+   const req=await db.ref("friendRequests").once("value");
+   req.forEach(s=>{
+     if(s.key===uid) updates["friendRequests/"+s.key]=null;
+     else{
+       const val=s.val()||{};
+       if(val[uid]!==undefined) updates["friendRequests/"+s.key+"/"+uid]=null;
+     }
+   });
+
+   // chats: remove any chat key containing this uid
+   const chats=await db.ref("chats").once("value");
+   chats.forEach(s=>{
+     const parts=String(s.key||"").split("_");
+     if(parts.includes(uid)) updates["chats/"+s.key]=null;
+   });
+
+   // calls / ICE: remove user branch and calls where from/to matches
+   updates["calls/"+uid]=null;
+   const calls=await db.ref("calls").once("value");
+   calls.forEach(parent=>{
+     const val=parent.val()||{};
+     Object.entries(val).forEach(([callId,c])=>{
+       if(c && (c.from===uid || c.to===uid)){
+         updates["calls/"+parent.key+"/"+callId]=null;
+       }
+     });
+   });
+   updates["callIce/"+uid]=null;
+
+   await db.ref().update(updates);
+   alert("Account deleted successfully.");
+   loadUsers();
+ }catch(e){
+   console.error(e);
+   alert("Delete failed: "+e.message);
+ }
+}
+</script>
+</body>
+</html>
