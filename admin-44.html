@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Hamro Message — Admin Panel</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef2f5;color:#17202a}
+button,input{font:inherit}button{border:0;cursor:pointer}
+.top{position:sticky;top:0;z-index:20;background:#075e54;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.top h1{font-size:19px;margin:0;flex:1}.wrap{max-width:1100px;margin:auto;padding:14px}
+.login{max-width:430px;margin:8vh auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0002}
+.login h2{margin-top:0;color:#075e54}.input{width:100%;padding:12px;border:1px solid #ccd2d8;border-radius:10px;margin:6px 0}
+.btn{padding:10px 13px;border-radius:9px;font-weight:700}.green{background:#25d366;color:#fff}.red{background:#d93025;color:#fff}.gray{background:#e9edf0;color:#222}.blue{background:#1877f2;color:#fff}
+.msg{min-height:20px;color:#c62828;font-size:13px;margin:7px 0}.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 8px #0001}.stat b{font-size:28px;display:block}.stat span{color:#667085;font-size:13px}
+.toolbar{background:#fff;border-radius:14px;padding:12px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap}.toolbar input{flex:1;min-width:200px}
+.user{background:#fff;border-radius:14px;padding:12px;margin:9px 0;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px #0001}
+.avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:#ddd;flex:none}.info{flex:1;min-width:0}.name{font-weight:700;font-size:16px}.sub{font-size:12px;color:#667085;word-break:break-word}.status{font-size:11px;font-weight:700}.online{color:#159447}.offline{color:#777}.blocked{color:#d93025}
+.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.actions button{font-size:12px;padding:8px 10px}
+.empty{text-align:center;background:#fff;border-radius:14px;padding:30px;color:#667085}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:50}.modal.open{display:flex}.box{width:min(500px,94%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}.box h2{margin-top:0}
+.detail{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:14px}.detail b{color:#667085}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.user{align-items:flex-start}.actions{width:100%;justify-content:flex-start}.avatar{width:48px;height:48px}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <h2>🛡️ Hamro Message Admin</h2>
+  <p style="color:#667085">Firebase Authentication se admin login karo.</p>
+  <input id="email" class="input" type="email" autocomplete="username" placeholder="Admin email">
+  <input id="password" class="input" type="password" autocomplete="current-password" placeholder="Password">
+  <button id="loginBtn" class="btn green" style="width:100%;margin-top:7px">Admin Login</button>
+  <div id="loginMsg" class="msg"></div>
+  <div style="font-size:12px;color:#667085;margin-top:12px">
+    Admin access tabhi milega jab Firebase Realtime Database me
+    <b>admins/&lt;Firebase Auth UID&gt; = true</b> ho.
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="top">
+    <h1>🛡️ Hamro Message Admin</h1>
+    <button id="logoutBtn" class="btn gray">Logout</button>
+  </div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="total">0</b><span>👥 Total Accounts</span></div>
+      <div class="stat"><b id="online">0</b><span>🟢 Online Now</span></div>
+      <div class="stat"><b id="offline">0</b><span>⚫ Offline</span></div>
+      <div class="stat"><b id="blocked">0</b><span>🚫 Blocked</span></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" class="input" style="margin:0" placeholder="Search name, nickname, phone, email or ID...">
+      <button id="refresh" class="btn blue">↻ Refresh</button>
+    </div>
+
+    <div id="list"></div>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="box">
+    <h2 id="modalTitle">User</h2>
+    <div id="detail"></div>
+    <button class="btn gray" style="width:100%;margin-top:14px" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyABquxqyv3ufNGwaMSdk586vZ3NJ7Y724A",
+ authDomain:"bd-bajar-chat.firebaseapp.com",
+ databaseURL:"https://bd-bajar-chat-default-rtdb.firebaseio.com",
+ projectId:"bd-bajar-chat",
+ storageBucket:"bd-bajar-chat.firebasestorage.app",
+ messagingSenderId:"948732860485",
+ appId:"1:948732860485:web:53144a4246c99b0e2a6b2c",
+ measurementId:"G-GC9547WN7Q"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database(),auth=firebase.auth();
+
+let users=[];
+let stopUsers=null;
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const photo=v=>v||"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(
+"<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='#ddd'/><text x='50' y='60' text-anchor='middle' font-size='42'>👤</text></svg>");
+
+function msg(t){$("loginMsg").textContent=t||""}
+
+async function isAdmin(uid){
+  const s=await db.ref("admins/"+uid).once("value");
+  return s.val()===true || s.val()==="true";
+}
+
+$("loginBtn").onclick=async()=>{
+  const email=$("email").value.trim().toLowerCase(), pass=$("password").value;
+  msg("");
+  if(!email||!pass)return msg("Email aur password enter karo.");
+  $("loginBtn").disabled=true;
+  try{
+    const cred=await auth.signInWithEmailAndPassword(email,pass);
+    if(!(await isAdmin(cred.user.uid))){
+      await auth.signOut();
+      return msg("❌ Is account ko admin permission nahi hai.");
+    }
+  }catch(e){
+    console.error(e);
+    msg(e.code==="auth/invalid-credential"||e.code==="auth/wrong-password"?
+      "Email/password galat hai.":(e.message||"Login failed"));
+  }finally{$("loginBtn").disabled=false}
+};
+
+$("logoutBtn").onclick=()=>auth.signOut();
+$("refresh").onclick=loadUsers;
+$("search").oninput=render;
+
+auth.onAuthStateChanged(async u=>{
+  if(!u){
+    $("login").classList.remove("hidden");
+    $("app").classList.add("hidden");
+    if(stopUsers){stopUsers();stopUsers=null}
+    return;
+  }
+  try{
+    if(!(await isAdmin(u.uid))){
+      await auth.signOut();
+      return msg("❌ Admin permission nahi hai.");
+    }
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    await loadUsers();
+  }catch(e){
+    console.error(e);
+    await auth.signOut();
+    msg("Admin verification failed: "+(e.message||""));
+  }
+});
+
+async function loadUsers(){
+  if(stopUsers){stopUsers();stopUsers=null}
+  const ref=db.ref("users");
+  const handler=snap=>{
+    const out=[];
+    snap.forEach(c=>{
+      const v=c.val()||{};
+      out.push({...v,id:String(v.id||c.key),_key:c.key});
+    });
+    users=out;
+    render();
+  };
+  ref.on("value",handler,err=>alert("Users read failed: "+err.message));
+  stopUsers=()=>ref.off("value",handler);
+}
+
+function render(){
+  const q=$("search").value.trim().toLowerCase();
+  const filtered=users.filter(u=>{
+    if(!q)return true;
+    return [u.id,u.phone,u.name,u.nickname,u.email,u.uid]
+      .some(x=>String(x||"").toLowerCase().includes(q));
+  });
+
+  // Online users first, then latest activity. This makes the live online list easy to see.
+  filtered.sort((a,b)=>{
+    const ao=a.online===true||a.online==="true", bo=b.online===true||b.online==="true";
+    if(ao!==bo)return ao?-1:1;
+    return Number(b.lastSeen||0)-Number(a.lastSeen||0);
+  });
+
+  let on=0,bl=0;
+  users.forEach(u=>{
+    if(u.online===true||u.online==="true")on++;
+    if(u.adminBlocked===true||u.adminBlocked==="true")bl++;
+  });
+  $("total").textContent=users.length;
+  $("online").textContent=on;
+  $("offline").textContent=Math.max(0,users.length-on);
+  $("blocked").textContent=bl;
+
+  if(!filtered.length){
+    $("list").innerHTML='<div class="empty">No user found.</div>';
+    return;
+  }
+
+  $("list").innerHTML=filtered.map(u=>{
+    const isOn=u.online===true||u.online==="true";
+    const isBlocked=u.adminBlocked===true||u.adminBlocked==="true";
+    return `
+    <div class="user">
+      <img class="avatar" src="${esc(photo(u.photo))}" alt="">
+      <div class="info">
+        <div class="name">${esc(u.name||"No Name")}</div>
+        <div class="sub">ID: ${esc(u.id)}</div>
+        <div class="sub">${esc(u.email||"No email")}</div>
+        <div class="status ${isOn?"online":"offline"}">${isOn?"🟢 Online":"⚫ Offline"} ${isBlocked?'<span class="blocked"> • 🚫 Blocked</span>':""}</div><div class="sub">Last seen: ${esc(formatTime(u.lastSeen))}</div>
+      </div>
+      <div class="actions">
+        <button class="btn blue" onclick="viewUser('${js(u.id)}')">View</button>
+        <button class="btn ${isBlocked?"green":"red"}" onclick="toggleBlock('${js(u.id)}',${isBlocked})">${isBlocked?"Unblock":"Block"}</button>
+        <button class="btn red" onclick="deleteUser('${js(u.id)}')">Delete</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function js(v){return String(v??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r")}
+
+function viewUser(id){
+  const u=users.find(x=>x.id===id); if(!u)return;
+  const isOn=u.online===true||u.online==="true";
+  $("modalTitle").textContent=u.name||"User";
+  $("detail").innerHTML=`
+    <div style="text-align:center;margin-bottom:15px">
+      <img src="${esc(photo(u.photo))}" style="width:100px;height:100px;border-radius:50%;object-fit:cover">
+    </div>
+    <div class="detail">
+      <b>ID</b><span>${esc(u.id)}</span>
+      <b>Name</b><span>${esc(u.name)}</span>
+      <b>Nickname</b><span>${esc(u.nickname)}</span>
+      <b>Phone</b><span>${esc(u.phone)}</span>
+      <b>Email</b><span>${esc(u.email)}</span>
+      <b>UID</b><span>${esc(u.uid)}</span>
+      <b>Status</b><span>${isOn?"🟢 Online":"⚫ Offline"}</span>
+      <b>Last Seen</b><span>${formatTime(u.lastSeen)}</span>
+      <b>Blocked</b><span>${u.adminBlocked===true||u.adminBlocked==="true"?"🚫 Yes":"No"}</span>
+      <b>Device Active</b><span>${u.deviceActive?"Yes":"No"}</span>
+    </div>`;
+  $("modal").classList.add("open");
+}
+function closeModal(){$("modal").classList.remove("open")}
+$("modal").onclick=e=>{if(e.target===$("modal"))closeModal()};
+
+async function toggleBlock(id,isBlocked){
+  const u=users.find(x=>x.id===id); if(!u)return;
+  const action=isBlocked?"UNBLOCK":"BLOCK";
+  if(!confirm(`${action}: ${u.name||id}?`))return;
+  try{
+    await db.ref("users/"+id).update({
+      adminBlocked:!isBlocked,
+      online:isBlocked ? (u.online===true) : false,
+      lastSeen:firebase.database.ServerValue.TIMESTAMP
+    });
+    alert(isBlocked?"✅ User unblocked.":"🚫 User blocked.");
+  }catch(e){
+    alert("Block operation failed: "+(e.message||e.code||"Firebase Rules check karo"));
+  }
+}
+
+async function deleteUser(id){
+  const u=users.find(x=>x.id===id); if(!u)return;
+  const text=prompt(
+    `⚠️ PERMANENT DATABASE DELETE\n\nUser: ${u.name||id}\nID: ${id}\n\nConfirm karne ke liye DELETE likho:`
+  );
+  if(text!=="DELETE")return;
+
+  try{
+    await deleteUserData(id);
+    alert("🗑️ User database data deleted.");
+  }catch(e){
+    console.error(e);
+    alert("Delete failed: "+(e.message||e.code||"Firebase Rules check karo"));
+  }
+}
+
+/*
+  Current Hamro Message structure ke according direct user-owned records
+  remove kiye ja rahe hain. Auth account ko browser se delete nahi kiya ja sakta;
+  Firebase Admin SDK/Cloud Function ke bina Auth user remain kar sakta hai.
+*/
+async function deleteUserData(id){
+  const updates={};
+
+  // Main profile and direct user collections found in the app.
+  [
+    "users/"+id,
+    "friends/"+id,
+    "friendRequests/"+id,
+    "blocks/"+id,
+    "notifications/"+id,
+    "stories/"+id,
+    "typing/"+id,
+    "calls/"+id,
+    "callIce/"+id
+  ].forEach(p=>updates[p]=null);
+
+  // Remove this user from other users' direct relationship maps.
+  const root=await db.ref().once("value");
+  const all=root.val()||{};
+
+  ["friends","friendRequests","blocks","notifications"].forEach(rootName=>{
+    const branch=all[rootName]||{};
+    Object.keys(branch).forEach(owner=>{
+      if(branch[owner] && Object.prototype.hasOwnProperty.call(branch[owner],id)){
+        updates[rootName+"/"+owner+"/"+id]=null;
+      }
+    });
+  });
+
+  // Posts are commonly keyed by push ID and contain uid/userId/authorId.
+  for(const rootName of ["posts"]){
+    const branch=all[rootName]||{};
+    Object.keys(branch).forEach(k=>{
+      const p=branch[k]||{};
+      if(String(p.uid||p.userId||p.authorId||"")===id){
+        updates[rootName+"/"+k]=null;
+      }
+    });
+  }
+
+  // Messages/call records are not blindly deleted because the current app
+  // has multiple chat/call structures. Profile + direct user-owned data is safe.
+  await db.ref().update(updates);
+}
+function formatTime(v){
+  if(!v)return "—";
+  const n=Number(v);
+  if(!Number.isFinite(n)||n<1000000000)return "—";
+  try{return new Date(n).toLocaleString()}catch(e){return "—"}
+}
+</script>
+</body>
+</html>
