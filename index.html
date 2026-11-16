@@ -1099,7 +1099,7 @@ async function loginWithEmail(){
    // First find the app profile. This supports email, phone and username.
    const u=await findUserByIdentifier(identifier);
    if(!u){
-     setLoginMessage("Account nahi mila. Create New Account karo.");
+     setLoginMessage("Account not available. please Create New Account .");
      return;
    }
 
