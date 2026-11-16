@@ -1071,7 +1071,7 @@ async function forgotPassword(){
  const input=document.getElementById("forgotIdentifier"), msg=document.getElementById("forgotMsg"), btn=document.getElementById("forgotSendBtn");
  const identifier=String(input?.value||"").trim();
  if(msg)msg.textContent="";
- if(!identifier){if(msg)msg.textContent="please enter your first Email phone number";return;}
+ if(!identifier){if(msg)msg.textContent="please enter your first Email  ";return;}
  btn.disabled=true;
  try{
    const u=await findUserByIdentifier(identifier);
@@ -1089,7 +1089,7 @@ async function loginWithEmail(){
  const identifier=(document.getElementById("setupEmail")?.value||"").trim();
  const pass=document.getElementById("setupPassword")?.value||"";
  setLoginMessage("");
- if(!identifier)return setLoginMessage(" please enter your first Email phone number ");
+ if(!identifier)return setLoginMessage(" please enter your first Email password ");
  if(!pass)return setLoginMessage("Password enter karo");
 
  const btn=document.getElementById("setupBtn");
@@ -1163,7 +1163,7 @@ async function loginWithEmail(){
    if(btn)btn.disabled=false;
  }
 }
-async function createAccount(){const name=document.getElementById("setupName").value.trim(),phone=document.getElementById("setupPhone").value.replace(/\D/g,""),email=document.getElementById("createEmail").value.trim().toLowerCase(),pass=document.getElementById("createPassword").value;setCreateMessage("");if(name.length<2)return setCreateMessage("enter first full details");if(phone.length!==10)return setCreateMessage("10 digit phone number enter karo");if(!email)return setCreateMessage("Email enter karo");if(pass.length<6)return setCreateMessage("Password minimum 6 characters");const btn=document.getElementById("createBtn");btn.disabled=true;try{const oldPhone=await db.ref("users/"+phone).once("value");if(oldPhone.exists())return setCreateMessage("Ye phone number already registered hai");const oldEmail=await findUserByIdentifier(email);if(oldEmail)return setCreateMessage("Ye email already registered hai");const cred=await auth.createUserWithEmailAndPassword(email,pass);const user={id:phone,uid:cred.user.uid,name,phone,email,photo:setupImage||"",deviceId,deviceActive:true,online:true,lastSeen:firebase.database.ServerValue.TIMESTAMP};await db.ref("users/"+phone).set(user);me=user;localStorage.setItem(USER_KEY,JSON.stringify(me));localStorage.setItem(SESSION_KEY,JSON.stringify({id:phone,deviceId}));showApp();toast("Account created & Login successful ✓")}catch(e){console.error(e);setCreateMessage(e.code==="auth/email-already-in-use"?"Ye email already registered hai":e.message||"Account create nahi hua")}finally{btn.disabled=false}}
+async function createAccount(){const name=document.getElementById("setupName").value.trim(),phone=document.getElementById("setupPhone").value.replace(/\D/g,""),email=document.getElementById("createEmail").value.trim().toLowerCase(),pass=document.getElementById("createPassword").value;setCreateMessage("");if(name.length<2)return setCreateMessage("please enter your first full details");if(phone.length!==10)return setCreateMessage("10 digit phone number enter karo");if(!email)return setCreateMessage("Email enter karo");if(pass.length<6)return setCreateMessage("Password minimum 6 characters");const btn=document.getElementById("createBtn");btn.disabled=true;try{const oldPhone=await db.ref("users/"+phone).once("value");if(oldPhone.exists())return setCreateMessage("Ye phone number already registered hai");const oldEmail=await findUserByIdentifier(email);if(oldEmail)return setCreateMessage("Ye email already registered hai");const cred=await auth.createUserWithEmailAndPassword(email,pass);const user={id:phone,uid:cred.user.uid,name,phone,email,photo:setupImage||"",deviceId,deviceActive:true,online:true,lastSeen:firebase.database.ServerValue.TIMESTAMP};await db.ref("users/"+phone).set(user);me=user;localStorage.setItem(USER_KEY,JSON.stringify(me));localStorage.setItem(SESSION_KEY,JSON.stringify({id:phone,deviceId}));showApp();toast("Account created & Login successful ✓")}catch(e){console.error(e);setCreateMessage(e.code==="auth/email-already-in-use"?"Ye email already registered hai":e.message||"Account create nahi hua")}finally{btn.disabled=false}}
 async function autoLogin(authUser=null){
   bindAuthUI();
   try{
