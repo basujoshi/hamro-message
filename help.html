@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#075e54">
+<title>Hamro Message — Help & Support</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --green:#075e54;--green2:#128c7e;--light:#f4f7f8;--card:#fff;
+  --text:#172126;--muted:#66747b;--border:#e4eaed;--blue:#2563eb;
+}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--light);color:var(--text)}
+button,input{font:inherit}
+.top{
+  position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#075e54,#128c7e);
+  color:#fff;padding:15px 16px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 3px 12px #0002
+}
+.back{border:0;background:#ffffff1c;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer}
+.logo{width:42px;height:42px;border-radius:50%;background:#fff;color:#128c7e;display:grid;place-items:center;font-size:22px;font-weight:800}
+.top h1{font-size:19px;margin:0}.top small{opacity:.85}
+.wrap{max-width:1050px;margin:auto;padding:18px}
+.hero{
+  border-radius:22px;padding:28px 22px;color:#fff;
+  background:linear-gradient(135deg,#1268d9,#0abf72);
+  box-shadow:0 10px 30px #087f6a22;margin-bottom:16px
+}
+.hero h2{font-size:31px;margin:0 0 8px}.hero p{margin:0;line-height:1.55}
+.search{display:flex;gap:10px;margin:16px 0}
+.search input{flex:1;border:1px solid var(--border);border-radius:15px;padding:15px 16px;outline:none;background:#fff}
+.search button,.contactBtn{
+  border:0;border-radius:15px;background:var(--green2);color:#fff;padding:0 20px;font-weight:700;cursor:pointer
+}
+.sectionTitle{display:flex;align-items:center;gap:9px;margin:24px 0 12px;font-size:21px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{
+  background:#fff;border:1px solid var(--border);border-radius:17px;padding:18px;
+  cursor:pointer;transition:.18s;box-shadow:0 4px 15px #00000008
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 22px #00000012}
+.icon{font-size:28px;margin-bottom:10px}.card h3{margin:0 0 5px;font-size:16px}.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.faq{background:#fff;border:1px solid var(--border);border-radius:17px;overflow:hidden}
+details{border-bottom:1px solid var(--border)}details:last-child{border-bottom:0}
+summary{padding:16px;cursor:pointer;font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"＋";float:right;color:var(--green2)}
+details[open] summary:after{content:"−"}
+.answer{padding:0 16px 16px;color:var(--muted);font-size:14px;line-height:1.65}
+.answer b{color:var(--text)}
+.support{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:18px;padding:20px}
+.panel h3{margin-top:0}
+.tip{display:flex;gap:10px;margin:10px 0;color:#445158;font-size:14px;line-height:1.45}
+.tip span{color:#0a9b70;font-weight:800}
+.hidden{display:none!important}
+#results{margin:10px 0}.result{background:#fff;border:1px solid var(--border);padding:14px;border-radius:13px;margin:8px 0}
+.result strong{display:block;margin-bottom:4px}.result p{margin:0;color:var(--muted);font-size:13px}
+footer{text-align:center;padding:28px 16px;color:#718087;font-size:13px}
+@media(max-width:720px){
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .support{grid-template-columns:1fr}
+ .hero h2{font-size:25px}
+}
+@media(max-width:430px){
+ .wrap{padding:12px}.grid{grid-template-columns:1fr 1fr;gap:9px}
+ .card{padding:14px}.search button{padding:0 14px}.search{gap:7px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="back" onclick="goBack()" aria-label="Back">‹</button>
+  <div class="logo">💬</div>
+  <div><h1>Hamro Message</h1><small>Help & Support</small></div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h2>Help & Support</h2>
+    <p>Find answers, learn how to use Hamro Message, manage your account, and keep your messages and personal data safe.</p>
+  </section>
+
+  <div class="search">
+    <input id="searchBox" type="search" placeholder="Search help... e.g. login, password, privacy" oninput="searchHelp()">
+    <button onclick="searchHelp()">Search</button>
+  </div>
+  <div id="results" class="hidden"></div>
+
+  <h2 class="sectionTitle">⚡ Quick Help</h2>
+  <section class="grid">
+    <article class="card" onclick="openTopic('login')"><div class="icon">🔐</div><h3>Login / Sign Up</h3><p>Account creation, login and password help.</p></article>
+    <article class="card" onclick="openTopic('privacy')"><div class="icon">🛡️</div><h3>Privacy & Security</h3><p>Protect your account and personal information.</p></article>
+    <article class="card" onclick="openTopic('chat')"><div class="icon">💬</div><h3>Chat & Messages</h3><p>Send, receive and manage messages.</p></article>
+    <article class="card" onclick="openTopic('media')"><div class="icon">🖼️</div><h3>Photos & Files</h3><p>Share photos, videos and files safely.</p></article>
+    <article class="card" onclick="openTopic('settings')"><div class="icon">⚙️</div><h3>Settings</h3><p>Profile, privacy and account settings.</p></article>
+    <article class="card" onclick="openTopic('issues')"><div class="icon">❓</div><h3>Common Issues</h3><p>Simple solutions when something does not work.</p></article>
+  </section>
+
+  <h2 class="sectionTitle">📖 Frequently Asked Questions</h2>
+  <section class="faq">
+    <details><summary>How do I create a new account?</summary><div class="answer">Open <b>Create New Account</b>, add your name, phone number, email address and a password of at least 6 characters. Add a profile photo if you want, then select <b>Save & Login</b>.</div></details>
+    <details><summary>How do I log in?</summary><div class="answer">Enter your registered <b>email or phone number</b>, enter your password, and press <b>Login</b>. Your account must already be registered.</div></details>
+    <details><summary>I forgot my password. What should I do?</summary><div class="answer">Select <b>Forgot Password?</b> on the login screen and enter your registered email or phone number. If an email is available for the account, a password-reset link can be sent to that email.</div></details>
+    <details><summary>How can I change my password?</summary><div class="answer">Open your account/settings area and use the password-change option. Keep your new password private and use a strong password that you do not reuse elsewhere.</div></details>
+    <details><summary>How do I change my profile photo?</summary><div class="answer">Open your profile, choose the profile-photo option, select an image from your device, and save the change.</div></details>
+    <details><summary>How do I send a message?</summary><div class="answer">Open Chat, choose the person you want to contact, type your message and use the send button. If the person cannot be found, check the account identifier and connection.</div></details>
+    <details><summary>How do I share photos, videos or files?</summary><div class="answer">Open the relevant chat and use the media/file attachment option. Choose the item from your device and confirm before sending.</div></details>
+    <details><summary>How do I manage privacy?</summary><div class="answer">Open <b>Privacy & Security</b> in settings. Review visibility options such as phone/email visibility, online status, last seen and read receipts, then choose the settings you want.</div></details>
+    <details><summary>How do I block or unblock someone?</summary><div class="answer">Use the user's profile/chat options to block them. Blocked users can be reviewed from the blocked-users area and unblocked when needed.</div></details>
+    <details><summary>How do I delete my account?</summary><div class="answer">Use the account deletion option in settings. Account deletion can be permanent, so read the confirmation carefully before continuing.</div></details>
+    <details><summary>Why am I not able to log in?</summary><div class="answer">Check your email/phone and password, make sure there are no extra spaces, and check your internet connection. If you forgot the password, use <b>Forgot Password?</b>.</div></details>
+    <details><summary>How can I keep my account safe?</summary><div class="answer">Use a strong private password, never share passwords or OTPs, avoid suspicious links, keep your device protected, and review privacy settings regularly.</div></details>
+  </section>
+
+  <div class="support" style="margin-top:18px">
+    <section class="panel">
+      <h3>🛡️ Privacy & Security</h3>
+      <div class="tip"><span>✓</span><div>Your messages and personal data should be treated as private and secure.</div></div>
+      <div class="tip"><span>✓</span><div>Never share your password, OTP, recovery information or other sensitive account details.</div></div>
+      <div class="tip"><span>✓</span><div>Use a strong password and avoid using the same password on multiple services.</div></div>
+      <div class="tip"><span>✓</span><div>If you notice unusual account activity, secure your account and seek support.</div></div>
+    </section>
+
+    <section class="panel">
+      <h3>💡 Quick Troubleshooting</h3>
+      <div class="tip"><span>1.</span><div>Check your internet connection.</div></div>
+      <div class="tip"><span>2.</span><div>Refresh or reopen the app.</div></div>
+      <div class="tip"><span>3.</span><div>Check that your login details are correct.</div></div>
+      <div class="tip"><span>4.</span><div>Use Forgot Password if you cannot remember your password.</div></div>
+      <div class="tip"><span>5.</span><div>If the issue continues, contact your app administrator/support team.</div></div>
+    </section>
+  </div>
+
+  <h2 class="sectionTitle">📩 Need More Help?</h2>
+  <section class="panel">
+    <h3>Still having a problem?</h3>
+    <p style="color:var(--muted);line-height:1.6">
+      Before contacting support, note the problem, the screen where it happened, and any error message you saw.
+      <b>Never send your password or OTP to anyone.</b>
+    </p>
+    <button class="contactBtn" onclick="contactSupport()">Contact Support</button>
+  </section>
+</main>
+
+<footer>
+  Hamro Message • Help Center • Privacy & Security<br>
+  Keep your account safe and use the app responsibly.
+</footer>
+
+<script>
+const topics={
+ login:{
+  title:"Login / Sign Up",
+  text:"Create an account with your name, phone number, email and password. For login, use your registered email or phone number and password. Use Forgot Password if needed."
+ },
+ privacy:{
+  title:"Privacy & Security",
+  text:"Review privacy settings, keep your password private, never share OTPs, and use a strong unique password."
+ },
+ chat:{
+  title:"Chat & Messages",
+  text:"Open Chat, choose a user, type your message and press Send. Check your connection if messages are not loading."
+ },
+ media:{
+  title:"Photos & Files",
+  text:"Use the attachment/media option inside a chat to select and share photos, videos or files."
+ },
+ settings:{
+  title:"Settings",
+  text:"Use Settings to manage your profile, password, privacy, blocked users and other account controls."
+ },
+ issues:{
+  title:"Common Issues",
+  text:"Check internet connection, refresh the app, verify login details and use password recovery when required."
+ }
+};
+
+function openTopic(key){
+ const t=topics[key];
+ if(!t)return;
+ alert(t.title+"\\n\\n"+t.text);
+}
+function searchHelp(){
+ const q=document.getElementById("searchBox").value.trim().toLowerCase();
+ const box=document.getElementById("results");
+ if(!q){box.classList.add("hidden");box.innerHTML="";return}
+ const all=[
+  ...Object.entries(topics).map(([k,v])=>({title:v.title,text:v.text})),
+  {title:"Forgot Password",text:"Use Forgot Password on the login screen to request a password reset link."},
+  {title:"Account Safety",text:"Never share your password or OTP. Use a strong password."},
+  {title:"Delete Account",text:"Use the account deletion option in settings and read the confirmation carefully."}
+ ];
+ const found=all.filter(x=>(x.title+" "+x.text).toLowerCase().includes(q));
+ box.classList.remove("hidden");
+ box.innerHTML=found.length
+  ? found.map(x=>`<div class="result"><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.text)}</p></div>`).join("")
+  : '<div class="result"><strong>No help found</strong><p>Try another keyword such as login, password, privacy, chat or settings.</p></div>';
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function contactSupport(){
+ alert("Please contact the official Hamro Message administrator/support team.\\n\\nDo not share your password or OTP.");
+}
+function goBack(){
+ if(history.length>1) history.back(); else location.href="index.html";
+}
+</script>
+</body>
+</html>
