@@ -58,7 +58,7 @@ const auth=firebase.auth(),db=firebase.database();
 
 /* IMPORTANT: replace only this value with your own Gmail address.
    Do NOT put an admin password in this HTML file. */
-const ADMIN_EMAIL="joshibasu12345@gmail.com";
+const ADMIN_EMAIL="joshibasu12345@gmail.com.com";
 
 const $=id=>document.getElementById(id);
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
@@ -103,13 +103,56 @@ async function loadUsers(){
       <td>${u.blocked===true?'<span style="color:#ff4d4f;font-weight:800">Blocked</span>':'<span style="color:#25a55a;font-weight:800">Active</span>'}</td>
       <td><div class="actions">
         <button class="btn ${u.blocked===true?"green":"red"}" onclick="toggleBlock('${esc(uid)}',${u.blocked===true})">${u.blocked===true?"Unblock":"Block"}</button>
+        <button class="btn red" onclick="deleteUser('${esc(uid)}')">Delete Account</button>
       </div></td>
     </tr>`).join("");
 }
 window.toggleBlock=async(uid,isBlocked)=>{
   if(!confirm(isBlocked?"Unblock this user?":"Block this user?"))return;
-  await db.ref("users/"+uid+"/blocked").set(!isBlocked);
-  await loadUsers();
+  try{
+    const snap=await db.ref("users/"+uid).once("value");
+    if(!snap.exists())throw new Error("User not found");
+    const u=snap.val()||{};
+    const updates={};
+    updates["users/"+uid+"/blocked"]=!isBlocked;
+    if(u.uid){
+      updates["blockedAuth/"+u.uid]=!isBlocked ? true : null;
+    }
+    await db.ref().update(updates);
+    await loadUsers();
+  }catch(e){alert("Block/Unblock failed: "+(e.message||e));}
+};
+
+window.deleteUser=async(uid)=>{
+  if(!confirm("Is account ko permanently delete/disable karna hai?"))return;
+  if(!confirm("Delete ke baad user app me login ya koi kaam nahi kar payega. Continue?"))return;
+  try{
+    const snap=await db.ref("users/"+uid).once("value");
+    if(!snap.exists())throw new Error("User not found");
+    const u=snap.val()||{};
+    const updates={};
+    // Disable the Firebase-auth identity from using this app, then remove
+    // the public profile. Firebase Auth itself cannot be deleted from a
+    // browser admin page without Admin SDK/Cloud Functions.
+    if(u.uid)updates["deletedAuth/"+u.uid]=true;
+    updates["users/"+uid]=null;
+    updates["friends/"+uid]=null;
+    updates["friendRequests/"+uid]=null;
+    updates["blocks/"+uid]=null;
+    updates["notifications/"+uid]=null;
+    updates["groupMembers/"+uid]=null;
+
+    const groups=await db.ref("groupChats").once("value");
+    groups.forEach(gSnap=>{
+      const g=gSnap.val()||{};
+      if(g.members && Object.prototype.hasOwnProperty.call(g.members,uid)){
+        updates["groupChats/"+gSnap.key+"/members/"+uid]=null;
+      }
+    });
+    await db.ref().update(updates);
+    alert("Account deleted/disabled successfully.");
+    await loadUsers();
+  }catch(e){alert("Delete failed: "+(e.message||e));}
 };
 </script>
 </body>
