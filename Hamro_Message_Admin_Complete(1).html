@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hamro Message • Admin</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f0f2f5;color:#17202a}
+.wrap{max-width:1100px;margin:auto;padding:20px}.top{background:#fff;border-radius:18px;padding:18px;display:flex;justify-content:space-between;gap:12px;align-items:center;box-shadow:0 8px 28px #0001;position:sticky;top:10px;z-index:5}
+.brand{font-size:22px;font-weight:900}.muted{color:#667085;font-size:13px}.btn{border:0;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer}.green{background:#25d366;color:#fff}.dark{background:#17202a;color:#fff}.red{background:#ff4d4f;color:#fff}.light{background:#eef2f6}
+.login{max-width:430px;margin:10vh auto;background:#fff;border-radius:22px;padding:28px;box-shadow:0 15px 50px #0002;text-align:center}.login h1{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 7px 24px #0001}.num{font-size:30px;font-weight:900;margin-top:6px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden}.tablewrap{overflow:auto}.user{display:flex;align-items:center;gap:10px}.user img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#ddd}.status{font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap}td,th{padding:12px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}
+#app{display:none}@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.top{position:static}}@media(max-width:520px){.wrap{padding:10px}.grid{grid-template-columns:1fr 1fr}.brand{font-size:18px}td,th{padding:9px}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div style="font-size:50px">🛡️</div>
+  <h1>Hamro Message Admin</h1>
+  <p class="muted">Sirf authorized Gmail account se access allowed hai.</p>
+  <button id="loginBtn" class="btn green">Continue with Google</button>
+  <p id="loginMsg" class="muted"></p>
+</div>
+
+<div id="app">
+<div class="wrap">
+  <div class="top">
+    <div><div class="brand">🛡️ Hamro Message Admin</div><div id="who" class="muted"></div></div>
+    <button id="logout" class="btn dark">Logout</button>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="muted">Total Users</div><div id="total" class="num">0</div></div>
+    <div class="card"><div class="muted">Online</div><div id="online" class="num">0</div></div>
+    <div class="card"><div class="muted">Blocked</div><div id="blocked" class="num">0</div></div>
+    <div class="card"><div class="muted">Groups</div><div id="groups" class="num">0</div></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Users</h3>
+    <div class="tablewrap"><table><thead><tr><th>User</th><th>Status</th><th>Actions</th></tr></thead><tbody id="users"></tbody></table></div>
+  </div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyD-ZwsV9vfkRvJQVGnezrIUsB0nZZXrSGo",
+ authDomain:"hamro-message-4622c.firebaseapp.com",
+ databaseURL:"https://hamro-message-4622c-default-rtdb.firebaseio.com",
+ projectId:"hamro-message-4622c",
+ messagingSenderId:"614672953381"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.database();
+
+/* IMPORTANT: replace only this value with your own Gmail address.
+   Do NOT put an admin password in this HTML file. */
+const ADMIN_EMAIL="YOUR_GMAIL_HERE@gmail.com";
+
+const $=id=>document.getElementById(id);
+function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function img(x){return x||"https://ui-avatars.com/api/?name=User&background=25d366&color=fff"}
+
+$("loginBtn").onclick=async()=>{
+  try{
+    const p=new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(p);
+  }catch(e){$("loginMsg").textContent=e.message||"Google login failed";}
+};
+$("logout").onclick=()=>auth.signOut();
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){$("login").style.display="block";$("app").style.display="none";return}
+  if(ADMIN_EMAIL==="YOUR_GMAIL_HERE@gmail.com"){
+    $("loginMsg").textContent="Admin email set karo: code me ADMIN_EMAIL change karo.";
+    await auth.signOut(); return;
+  }
+  if((user.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+    $("loginMsg").textContent="Access denied: ye Gmail admin nahi hai.";
+    await auth.signOut(); return;
+  }
+  $("login").style.display="none";$("app").style.display="block";
+  $("who").textContent=user.email;
+  loadUsers();
+});
+
+async function loadUsers(){
+  const s=await db.ref("users").once("value"),rows=[],v=s.val()||{};
+  let online=0,blocked=0;
+  Object.entries(v).forEach(([uid,u])=>{
+    if(u.online===true||u.online==="true")online++;
+    if(u.blocked===true)blocked++;
+    rows.push({uid,u});
+  });
+  $("total").textContent=rows.length;$("online").textContent=online;$("blocked").textContent=blocked;
+  const gs=await db.ref("groupChats").once("value");$("groups").textContent=gs.numChildren();
+  $("users").innerHTML=rows.map(({uid,u})=>`
+    <tr>
+      <td><div class="user"><img src="${esc(img(u.photo))}"><div><b>${esc(u.name||"User")}</b><div class="muted">${esc(u.email||"")}</div></div></div></td>
+      <td>${u.blocked===true?'<span style="color:#ff4d4f;font-weight:800">Blocked</span>':'<span style="color:#25a55a;font-weight:800">Active</span>'}</td>
+      <td><div class="actions">
+        <button class="btn ${u.blocked===true?"green":"red"}" onclick="toggleBlock('${esc(uid)}',${u.blocked===true})">${u.blocked===true?"Unblock":"Block"}</button>
+      </div></td>
+    </tr>`).join("");
+}
+window.toggleBlock=async(uid,isBlocked)=>{
+  if(!confirm(isBlocked?"Unblock this user?":"Block this user?"))return;
+  await db.ref("users/"+uid+"/blocked").set(!isBlocked);
+  await loadUsers();
+};
+</script>
+</body>
+</html>
