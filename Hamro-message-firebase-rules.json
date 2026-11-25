@@ -1,0 +1,135 @@
+{
+  "rules": {
+    "users": {
+      ".read": true,
+      ".indexOn": [
+        "email",
+        "phone",
+        "uid",
+        "name"
+      ],
+      "$uid": {
+        ".read": true,
+        ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+      }
+    },
+    "friends": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "friendRequests": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "blocks": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "notifications": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "chats": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "typing": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "posts": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "stories": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "videos": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "likes": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "comments": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "presence": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "online": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "calls": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "callIce": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "videoCalls": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupMembers": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupChats": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupMessages": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupChatMessages": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupCalls": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupCallIce": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "groupCallsInbox": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "reports": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "settings": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "callSettings": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "blockedAuth": {
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu123456@gmail.com'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu12345@gmail.com')",
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu12345@gmail.com'"
+      }
+    },
+    "deletedAuth": {
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu12345@gmail.com'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu12345@gmail.com')",
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'joshibasu12345@gmail.com'"
+      }
+    }
+  }
+}
