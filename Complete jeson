@@ -37,6 +37,14 @@
       ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
       ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
     },
+    "presence": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
+    "online": {
+      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
+      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
+    },
     "posts": {
       ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
       ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
@@ -54,14 +62,6 @@
       ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
     },
     "comments": {
-      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
-      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
-    },
-    "presence": {
-      ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
-      ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
-    },
-    "online": {
       ".read": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true",
       ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
     },
@@ -114,17 +114,29 @@
       ".write": "auth != null && root.child('blockedAuth').child(auth.uid).val() != true && root.child('deletedAuth').child(auth.uid).val() != true"
     },
     "blockedAuth": {
-      ".read": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'",
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'",
       "$uid": {
-        ".read": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'",
-        ".write": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'"
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com')",
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'"
       }
     },
     "deletedAuth": {
-      ".read": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'",
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'",
       "$uid": {
-        ".read": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'",
-        ".write": "auth != null && auth.token.email === 'joshibasu12345@gmail.com'"
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com')",
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'"
+      }
+    },
+    "publicAccountStatus": {
+      ".read": true,
+      ".indexOn": [
+        "status"
+      ],
+      "$uid": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() == 'joshibasu12345@gmail.com'"
       }
     }
   }
