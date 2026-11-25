@@ -47,12 +47,14 @@ button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:poin
     <div class="stat"><small>Total Users</small><b id="total">0</b></div>
     <div class="stat"><small>Online</small><b id="online">0</b></div>
     <div class="stat"><small>Blocked</small><b id="blocked">0</b></div>
+    <div class="stat"><small>Active / Unblocked</small><b id="activeUsers">0</b></div>
     <div class="stat"><small>Groups</small><b id="groups">0</b></div>
   </div>
 
   <div class="card">
     <div class="head"><h2>Users</h2><span id="statusText" style="color:#667085">Loading…</span></div>
     <input id="search" class="search" placeholder="Search name, email, phone or user ID…" oninput="renderUsers()">
+    <div style="margin:10px 0 0;color:#667085;font-size:13px">Blocked account → <b>Unblock</b> button appears automatically. Blocked count updates live.</div>
     <div id="users"><div class="loading">Loading users…</div></div>
   </div>
 </div>
@@ -116,6 +118,7 @@ async function loadAll(){
     document.getElementById("total").textContent=allUsers.length;
     document.getElementById("online").textContent=allUsers.filter(u=>u.online===true||u.online==="true").length;
     document.getElementById("blocked").textContent=Object.keys(blockedMap).length;
+    document.getElementById("activeUsers").textContent=Math.max(0,allUsers.length-Object.keys(blockedMap).length-Object.keys(deletedMap).length);
     let gc=0;if(gs)gs.forEach(()=>gc++);
     document.getElementById("groups").textContent=gc;
     renderUsers();
@@ -136,7 +139,8 @@ function renderUsers(){
   if(!list.length){document.getElementById("users").innerHTML='<div class="loading">No users found.</div>';return}
   document.getElementById("users").innerHTML=list.map(u=>{
     const isMe=u.uid===auth.currentUser?.uid || u.email===ADMIN_EMAIL;
-    const b=!!blockedMap[u.uid],d=!!deletedMap[u.uid];
+    const authUid=u.uid || "";
+    const b=!!(authUid && blockedMap[authUid]),d=!!(authUid && deletedMap[authUid]);
     let status=d?'<span class="badge deleted">Deleted</span>':b?'<span class="badge blocked">Blocked</span>':(u.online===true||u.online==="true"?'<span class="badge online">Online</span>':'<span class="badge offline">Offline</span>');
     return `<div class="user">
       <div class="person"><img class="avatar" src="${esc(photo(u))}" onerror="this.src='https://via.placeholder.com/100?text=User'">
