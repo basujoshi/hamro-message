@@ -62,7 +62,8 @@ button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:poin
 <div id="toast" class="toast"></div>
 
 <script>
-const ADMIN_EMAIL="joshibasu12345@gmail.com";
+const ADMIN_EMAILS=["joshibasu12345@gmail.com","joshibasu12345@gmail.com"];
+const ADMIN_EMAIL=ADMIN_EMAILS[0];
 const firebaseConfig={
  apiKey:"AIzaSyD-ZwsV9vfkRvJQVGnezrIUsB0nZZXrSGo",
  authDomain:"hamro-message-4622c.firebaseapp.com",
@@ -88,7 +89,7 @@ document.getElementById("googleBtn").onclick=async()=>{
 
 auth.onAuthStateChanged(async user=>{
   if(!user){document.getElementById("login").style.display="block";document.getElementById("app").style.display="none";return}
-  if((user.email||"").trim()!==ADMIN_EMAIL){
+  if(!ADMIN_EMAILS.includes((user.email||"").trim().toLowerCase())){
     document.getElementById("loginErr").textContent="This Gmail is not authorized as Admin.";
     await auth.signOut(); return;
   }
@@ -138,7 +139,7 @@ function renderUsers(){
   });
   if(!list.length){document.getElementById("users").innerHTML='<div class="loading">No users found.</div>';return}
   document.getElementById("users").innerHTML=list.map(u=>{
-    const isMe=u.uid===auth.currentUser?.uid || u.email===ADMIN_EMAIL;
+    const isMe=u.uid===auth.currentUser?.uid || ADMIN_EMAILS.includes(String(u.email||"").toLowerCase());
     const authUid=u.uid || "";
     const b=!!(authUid && blockedMap[authUid]),d=!!(authUid && deletedMap[authUid]);
     let status=d?'<span class="badge deleted">Deleted</span>':b?'<span class="badge blocked">Blocked</span>':(u.online===true||u.online==="true"?'<span class="badge online">Online</span>':'<span class="badge offline">Offline</span>');
@@ -168,7 +169,7 @@ async function viewUser(uid){
 
 async function setBlocked(userId,state){
   const u=allUsers.find(x=>x.id===userId); if(!u)return;
-  if(u.uid===auth.currentUser?.uid || String(u.email||'').toLowerCase()===ADMIN_EMAIL.toLowerCase())return;
+  if(u.uid===auth.currentUser?.uid || ADMIN_EMAILS.includes(String(u.email||'').trim().toLowerCase()))return;
   const authUid=u.uid;
   if(!authUid)return toast("Is account ka Firebase UID nahi mila");
   try{
@@ -181,7 +182,7 @@ async function setBlocked(userId,state){
 
 async function deleteUser(userId){
   const u=allUsers.find(x=>x.id===userId); if(!u)return;
-  if(u.uid===auth.currentUser?.uid || String(u.email||'').toLowerCase()===ADMIN_EMAIL.toLowerCase())return;
+  if(u.uid===auth.currentUser?.uid || ADMIN_EMAILS.includes(String(u.email||'').trim().toLowerCase()))return;
   if(!confirm("Is account ko disable/delete karna hai? User app me access nahi kar payega jab tak admin restore nahi karta. Continue?"))return;
   if(!u.uid)return toast("Is account ka Firebase UID nahi mila");
   try{
